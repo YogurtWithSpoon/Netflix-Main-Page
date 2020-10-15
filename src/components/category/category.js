@@ -8,6 +8,8 @@ import movieTrailer from "movie-trailer";
 // styles
 import "./category.scss";
 
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+
 const Category = ({ title, fetchURL, isLarge }) => {
   const [movies, setMovies] = useState([""]);
   const [trailerURL, setTrailerURL] = useState("");
@@ -30,13 +32,15 @@ const Category = ({ title, fetchURL, isLarge }) => {
 
   useEffect(() => {
     async function fetchMovies() {
-      setLoading(true);
       const request = await requestBuilder.get(fetchURL);
       setMovies(request.data.results);
       return request;
     }
-    setLoading(false);
-    fetchMovies();
+    setLoading(true);
+    fetchMovies()
+    setTimeout(() => {
+      setLoading(false);
+    }, 1500);
   }, [fetchURL]);
 
   const config = {
@@ -51,7 +55,7 @@ const Category = ({ title, fetchURL, isLarge }) => {
     <div className={`category`}>
       <h2 className="category__title">{title}</h2>
       <div className="category__gallery">
-        {isLoading ? (
+        {!isLoading ? (
           movies.map((item) => (
             <img
               className={`category__poster${
@@ -66,7 +70,11 @@ const Category = ({ title, fetchURL, isLarge }) => {
             />
           ))
         ) : (
-          <p className="category__loading">Loading</p>
+          <SkeletonTheme color="#444" highlightColor="#666">
+              <Skeleton height={isLarge ? 250 : 100} width={isLarge ? 170 : 200} count={10} duration={3} style={{
+                marginRight: '20px',
+                display:'block'}}/>
+          </SkeletonTheme>
         )}
       </div>
       {trailerURL && <Youtube videoId={trailerURL} opts={config} />}
